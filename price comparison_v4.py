@@ -1,3 +1,6 @@
+import pandas
+import numpy
+
 
 # Functions go here
 def make_statement(statement, decoration):
@@ -18,7 +21,7 @@ def string_check(question, valid_ans_list=('yes', 'no'),
 
         for ITEM in valid_ans_list:
 
-            # check if the response is the entire word
+            # check if the response is the entire world
             if response == ITEM:
                 return ITEM
 
@@ -77,6 +80,7 @@ def int_check(question, low, high):
     while True:
 
         try:
+            # Change the response to an integer and check that it's more than zero
             response = int(input(question))
 
             if low <= response <= high:
@@ -88,7 +92,44 @@ def int_check(question, low, high):
             print(error)
 
 
+def currency(x):
+    """Formats numbers as currency ($#.##)"""
+    return "${:.2f}".format(x)
+
+
 # Main Routine goes here
+
+# Initialise sweet numbers
+MAX_SPEND = 1000
+budget = 0
+
+# lists to hold ticket details
+all_sweets = [
+    "Sherbet Line",
+    "Hi-Chews",
+    "Mints",
+    "Mystery Bag",
+    "Hi-chews",
+    "Turkish Delight",
+    "Chocolate Bars",
+    "Gummy Bears",
+    "Caramel Eclairs",
+    "Nerd Pack",
+
+]
+
+all_sweets_costs = [1, 2, 2, 2, 2, 2, 3, 4, 4, 5, ]
+
+sweets_dict = {
+    'Sweets': all_sweets,
+    'Sweets Price': all_sweets_costs,
+}
+
+# create dataframe / table from dictionary
+sweets_frame = pandas.DataFrame(sweets_dict)
+
+# Rearranging index
+sweets_frame.index = numpy.arange(1, len(sweets_frame) + 1)
 
 # Program main heading
 print(make_statement("Candy land", "🍭"))
@@ -98,6 +139,7 @@ print()
 name = not_blank("Name: ")
 
 # Ask user if they want to see the instructions
+# display them if necessary
 print()
 want_instructions = string_check(f" Hi {name}, Do you want to see the instructions? ")
 
@@ -107,7 +149,56 @@ if want_instructions == "yes":
 print()
 
 # ask for budget
-budget = int_check("What is your budget? (Maximum Budget of $20) ", 1, 20)
+budget = int_check("what is your budget? (Maximum Budget of $20) ", 1, 20)
 
-print(f"Your budget is ${budget}")
+print(f"your budget is ${budget}")
 print()
+
+# import list of sweets
+sweet_string = sweets_frame.to_string(index=False)
+
+# loop
+while budget <= MAX_SPEND:
+
+    print()
+
+    # display items
+    print("here's a list of sweets you can select from")
+    print(sweets_frame)
+    print()
+
+    # prompt user to select a row
+    try:
+        # ask user for choice
+        choice = int_check("choose your sweet with the number of the corresponding row: ", 1, 10)
+
+        selected_row = all_sweets[choice - 1]
+        sweets_price = all_sweets_costs[choice - 1]
+
+        if budget >= sweets_price:
+            budget -= sweets_price
+
+            # display choice
+            print(f"your selected {selected_row} costing ${sweets_price} ")
+            print(f"your new budget is ${budget} ")
+            print()
+
+        else:
+            print(f"sorry the {selected_row} costing ${sweets_price} "
+                  f"is above your current budget of ${budget}. Please try again.")
+            continue
+
+        if budget <= 0:
+            print("You don't have enough money to make any more purchases ❌")
+            print()
+            break
+
+        repurchase = string_check("Would you like to purchase another sweet ")
+
+        if repurchase == "no":
+            break
+
+    except ValueError:
+        print("Please enter a valid number")
+
+# End of Loop
